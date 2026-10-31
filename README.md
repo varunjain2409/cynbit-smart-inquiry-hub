@@ -6,6 +6,10 @@ Author: Varun Jain (B.Tech CSE, 2027 · Jaipur) · [github.com/varunjain2409](ht
 **Live prototype:** _(`https://cynbit-smart-inquiry-hub.onrender.com` after Render deploy)_
 **Visitor flow:** `/` · **Admin CRM:** `/admin` · **Health:** `/api/health`
 
+| Visitor flow (improved inquiry hub) | Admin CRM (live pipeline) |
+|---|---|
+| ![Visitor flow](docs/screenshots/visitor-hero.jpg) | ![Admin CRM](docs/screenshots/admin-crm.jpg) |
+
 ---
 
 ## 1. Problem statement
