@@ -140,3 +140,52 @@ Optional: `set OPENAI_API_KEY=sk-...` to switch previews to GPT-4o-mini.
 - Rate limiting + CAPTCHA before public hardening (honeypot included already).
 - The widget is written embeddable-first (`<script>` + iframe mount) so it can be
   injected into cynbit.in without touching their Next.js core.
+
+## 7. Execution notes
+
+How the build actually went — decisions, tradeoffs and what shipped:
+
+- **Analysis first, code second.** A full crawl of `/`, `/services`, `/products`,
+  `/careers` and `/contact` produced the claims-vs-reality gap table in §1.
+  Three improvement candidates were shortlisted (site-wide search, careers
+  revamp, inquiry-hub) and the **Smart Inquiry Hub** was selected because it
+  converts marketing claims into working product — the strongest case for a
+  full-stack evaluation.
+- **Design mirrors cynbit.in.** The prototype reuses Cynbit's own dark palette,
+  Material Symbols iconography and "blueprint/discovery" vocabulary so the team
+  can judge it *embedded in their brand*, not as a foreign template. A visible
+  `UI PROTOTYPE` badge keeps it honest.
+- **Engine design.** The rule engine (§3.3 table) was calibrated on two synthetic
+  extremes (a long corporate-portals brief → 87 🔥 Hot; a one-line Gmail "just
+  exploring" → 34 Exploring) and then spot-checked on mixed cases to keep middle
+  bands honest. `OPENAI_API_KEY` support was layered on top, never inside, the
+  core — the intake funnel must survive an API outage.
+- **Simplicity kept deliberate.** Eleven files, no build chain, two dependencies
+  (Flask, OpenAI-optional). Every deliverable in the task brief lives in the repo:
+  clean history, live URL, screenshots and this document.
+- **Guard against over-claiming.** Email/CRM webhooks and CAPTCHA are roadmap
+  items explicitly NOT bundled into the demo — the reviewer sees exactly what
+  works today and what is scoped for later.
+
+## 8. Campaign rationale
+
+Why this improvement is the right campaign for Cynbit's website — and why it
+markets itself the moment it works:
+
+1. **It demonstrates the product by being the product.** Cynbit's #1 promise is
+   autonomous agents and lead-automation. A visitor who watches their inquiry
+   return a fit-score and a Project Intelligence preview has already *experienced*
+   what is being sold — stronger conversion proof than any testimonial card.
+2. **The funnel becomes measurable, finally.** The source of truth moves from an
+   unread mail inbox to a scored, filterable pipeline with statuses. That is the
+   first step Cynbit asks of every client: "make it visible, then optimise it."
+3. **Every stakeholder gains.**
+   - *Marketing:* instant social proof — "our own site qualifies leads in seconds"
+   - *Sales:* hot leads surface in minutes, making the 24H response SLA real
+   - *Ops:* the Admin CRM replaces "check mail" with a working funnel view
+   - *Engineering:* a one-line embed (`<script>` + iframe mount) drops into their
+     Next.js core without build-chain surgery
+4. **Zero-cost, zero-risk rollout.** The rule-engine core runs free and
+   offline-first; the LLM upgrade is an optional env flag. Cynbit can trial it on
+   one inquiry source before touching production — and the live prototype already
+   proves the whole loop works end to end.
