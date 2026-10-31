@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets
+.env
+*.key
+*.pem
+
+# Runtime data (created on first boot)
+data/
+
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store

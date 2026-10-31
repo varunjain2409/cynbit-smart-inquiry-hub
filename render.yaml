@@ -1,0 +1,14 @@
+# Render Blueprint — auto deployment config
+services:
+  - type: web
+    name: cynbit-smart-inquiry-hub
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 90
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      # Optional: add OPENAI_API_KEY in the Render dashboard to switch
+      # Project Intelligence previews from rule-engine to gpt-4o-mini.

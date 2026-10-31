@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cynbit Smart Inquiry Hub — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,300..500,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="logo" href="/">cynbit<span>.in</span></a>
+  <div class="nav-links">
+    <a href="#improvement">The Improvement</a>
+    <a href="/admin">Admin · CRM</a>
+  </div>
+  <span class="proto-badge">UI PROTOTYPE · not the live cynbit.in site</span>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow"><span class="material-symbols-outlined">psychology</span> Intelligence Active — Smart Inquiry Hub</div>
+  <h1>Your inquiry is <em>qualified</em><br>before you finish reading.</h1>
+  <p class="lede">Cynbit sells <strong>autonomous agents</strong> and <strong>CRM automation</strong>. This prototype puts that promise on the website itself: every inquiry instantly returns a fit-score, a Project Intelligence preview and a clear next step — and lands in a working pipeline, not a mailto: link.</p>
+  <div class="hero-chips">
+    <span class="chip"><span class="material-symbols-outlined">bolt</span>Instant qualification</span>
+    <span class="chip"><span class="material-symbols-outlined">insights</span>Project Intelligence</span>
+    <span class="chip"><span class="material-symbols-outlined">database</span>Persisted pipeline</span>
+    <span class="chip"><span class="material-symbols-outlined">shield</span>Never depends on a paid API</span>
+  </div>
+</header>
+
+<section class="compare" id="improvement">
+  <div class="cards">
+    <div class="card before">
+      <h3><span class="material-symbols-outlined">link_off</span> Before — current flow</h3>
+      <ul>
+        <li>Static form; primary CTA is a <code>mailto:</code> link</li>
+        <li>Submission data is <strong>not captured or persisted</strong></li>
+        <li>No prioritisation — every lead is one flat inbox</li>
+        <li>"24H response" promise has no system behind it</li>
+      </ul>
+    </div>
+    <div class="card after">
+      <h3><span class="material-symbols-outlined">link</span> After — Smart Inquiry Hub</h3>
+      <ul>
+        <li>REST API (<code>POST /api/inquire</code>) with strict validation</li>
+        <li>Every lead scored 0–100 with <strong>explainable signals</strong></li>
+        <li>Auto-generated <strong>Project Intelligence</strong> for the reviewer</li>
+        <li>SQLite pipeline + <a href="/admin">Admin CRM</a> with statuses</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<main class="hub">
+  <div class="form-wrap">
+    <h2><span class="material-symbols-outlined">hub</span> Start your discovery phase</h2>
+    <form id="inquiry" novalidate>
+      <div class="grid">
+        <label>Full name
+          <input id="name" name="name" type="text" autocomplete="name" required>
+          <span class="err" data-err-for="name"></span>
+        </label>
+        <label>Email
+          <input id="email" name="email" type="email" autocomplete="email" required>
+          <span class="err" data-err-for="email"></span>
+        </label>
+        <label>Company <small>(optional)</small>
+          <input id="company" name="company" type="text" autocomplete="organization">
+        </label>
+        <label>Industry <small>(optional)</small>
+          <input id="industry" name="industry" type="text">
+        </label>
+      </div>
+
+      <div class="chips-group" data-field="service">
+        <span class="chips-label">What do you need? <span class="req">*</span></span>
+        <div class="chips" id="serviceChips">
+          <button type="button" data-value="AI Automation">AI Automation</button>
+          <button type="button" data-value="Software Development">Software Development</button>
+          <button type="button" data-value="Cloud & Infrastructure">Cloud & Infrastructure</button>
+          <button type="button" data-value="Marketing & SEO">Marketing & SEO</button>
+          <button type="button" data-value="Other">Other</button>
+        </div>
+        <span class="err" data-err-for="service"></span>
+      </div>
+
+      <div class="grid">
+        <label>Budget band
+          <select id="budget" name="budget">
+            <option>Under ₹50k</option>
+            <option>₹50k – ₹2L</option>
+            <option selected>₹2L – ₹10L</option>
+            <option>₹10L+</option>
+            <option>Not sure yet</option>
+          </select>
+        </label>
+        <label>Timeline
+          <select id="timeline" name="timeline">
+            <option>ASAP / this month</option>
+            <option>1–3 months</option>
+            <option>3–6 months</option>
+            <option selected>Just exploring</option>
+          </select>
+        </label>
+      </div>
+
+      <label>Your message <span class="req">*</span>
+        <textarea id="message" name="message" rows="5" maxlength="3000"
+          placeholder="e.g. We run a D2C brand in Jaipur and want an AI agent to qualify Instagram leads and book discovery calls automatically…"></textarea>
+        <span class="err" data-err-for="message"></span>
+      </label>
+
+      <!-- honeypot for bots -->
+      <input type="text" id="website_hp" name="website" tabindex="-1" autocomplete="off" class="hp">
+
+      <button class="submit" id="submitBtn" type="submit">
+        <span class="material-symbols-outlined">smart_toy</span>
+        Get my Project Intelligence
+      </button>
+    </form>
+  </div>
+
+  <aside class="result" id="resultCard" hidden>
+    <div class="score-ring">
+      <svg viewBox="0 0 120 120" role="img" aria-label="Lead score">
+        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+        <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"/>
+      </svg>
+      <div class="score-num"><span id="scoreVal">0</span><small>/100</small></div>
+      <div class="tier" id="tierBadge">—</div>
+    </div>
+
+    <section class="intel">
+      <h4><span class="material-symbols-outlined">psychology_alt</span> Project Intelligence
+        <span class="src" id="srcBadge">rule-engine</span></h4>
+      <p id="intelText">—</p>
+    </section>
+
+    <section class="nextstep">
+      <h4><span class="material-symbols-outlined">flag</span> Next step</h4>
+      <p id="nextStepText">—</p>
+    </section>
+
+    <details class="signals">
+      <summary>Why this score? <small>(explainable, honest)</small></summary>
+      <ul id="signalsList"></ul>
+    </details>
+
+    <p class="saved"><span class="material-symbols-outlined">check_circle</span> Saved to pipeline · lead <b id="leadId">#—</b> · visible in <a href="/admin">Admin CRM</a></p>
+    <p class="disclaimer">Scores are transparent rules — never a black box. A human reviewer always decides.</p>
+  </aside>
+</main>
+
+<footer>
+  <p>Built as a Full Stack Developer Intern task prototype · <a href="https://github.com/varunjain2409/cynbit-smart-inquiry-hub">source code</a> · Flask + SQLite + vanilla JS. Rule-based core ships with zero paid dependencies; OpenAI (GPT-4o mini) auto-upgrades previews when <code>OPENAI_API_KEY</code> is present.</p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

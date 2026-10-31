@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Pipeline · Cynbit Smart Inquiry Hub · Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,300..500,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="admin">
+
+<nav class="nav">
+  <a class="logo" href="/">cynbit<span>.in</span></a>
+  <div class="nav-links"><a href="/">Visitor flow</a></div>
+  <span class="proto-badge">ADMIN · MINI-CRM</span>
+</nav>
+
+<header class="admin-hero">
+  <h1><span class="material-symbols-outlined">dashboard</span> Lead Pipeline</h1>
+  <p>Every inquiry rendered as a living, prioritised funnel — not an unread inbox.</p>
+</header>
+
+<section class="stat-grid" id="stats">
+  <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-lbl">Total leads</span></div>
+  <div class="stat hot"><span class="stat-num" id="stat-hot">0</span><span class="stat-lbl">🔥 Hot</span></div>
+  <div class="stat warm"><span class="stat-num" id="stat-warm">0</span><span class="stat-lbl">Warm</span></div>
+  <div class="stat expl"><span class="stat-num" id="stat-exploring">0</span><span class="stat-lbl">Exploring</span></div>
+  <div class="stat"><span class="stat-num" id="stat-avg_score">0</span><span class="stat-lbl">Avg score</span></div>
+  <div class="stat"><span class="stat-num" id="stat-new_count">0</span><span class="stat-lbl">Untouched (New)</span></div>
+</section>
+
+<section class="toolbar">
+  <input id="filter" type="search" placeholder="Filter by name / email / service…">
+  <select id="tierFilter">
+    <option value="">All tiers</option>
+    <option>Hot</option>
+    <option>Warm</option>
+    <option>Exploring</option>
+  </select>
+  <button id="refresh" class="ghost"><span class="material-symbols-outlined">refresh</span> Refresh</button>
+</section>
+
+<main class="lead-table-wrap">
+  <table class="lead-table">
+    <thead>
+      <tr>
+        <th>ID · Date</th><th>Contact</th><th>Need</th><th>Message</th>
+        <th>Score</th><th>Next step</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="leadRows">
+      <tr><td colspan="7" class="empty">Loading leads…</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<footer>
+  <p>Free-tier note: SQLite lives on the ephemeral disk. For production, swap <code>database.py</code> to Postgres (schema-compatible).</p>
+</footer>
+
+<script>
+const $ = (s, el=document) => el.querySelector(s);
+
+async function load(){
+  const [stats, leads] = await Promise.all([
+    fetch('/api/stats').then(r=>r.json()),
+    fetch('/api/leads').then(r=>r.json())
+  ]);
+  for (const k of ['total','hot','warm','exploring','avg_score','new_count']){
+    const el = document.getElementById('stat-'+k);
+    if (el && stats[k] !== undefined) el.textContent = stats[k];
+  }
+  render(leads.leads || []);
+}
+
+function render(leads){
+  const filter = ($('#filter').value||'').toLowerCase();
+  const tierF = $('#tierFilter').value;
+  const rows = leads.filter(l =>
+    (!tierF || l.tier===tierF) &&
+    (!filter || [l.name,l.email,l.service,l.company,l.industry].join(' ').toLowerCase().includes(filter)));
+
+  const tb = $('#leadRows');
+  if (!rows.length){
+    tb.innerHTML = '<tr><td colspan="7" class="empty">No leads match. Submit one from the visitor flow to see the pipeline in action ⇉ /</td></tr>';
+    return;
+  }
+  tb.innerHTML = rows.map(l => `
+    <tr class="tier-${l.tier.toLowerCase().replace(' ','')}">
+      <td><b>#${l.id}</b><br><small>${l.created_at.slice(0,16).replace('T',' ')}</small></td>
+      <td><b>${esc(l.name)}</b><br><small>${esc(l.email)}${l.company?' · '+esc(l.company):''}${l.industry?' · '+esc(l.industry):''}</small></td>
+      <td>${esc(l.service)}<br><small>${esc(l.budget)} · ${esc(l.timeline)}</small></td>
+      <td class="msg">${esc(l.message.slice(0,160))}${l.message.length>160?'…':''}
+        <details><summary>Project Intelligence</summary><div class="intel-mini">${esc(l.intelligence)} <i>(${l.summary_type})</i></div></details>
+      </td>
+      <td><span class="pill ${l.tier.toLowerCase()}">${l.score} · ${l.tier}</span></td>
+      <td><small>${esc(l.next_step)}</small></td>
+      <td>
+        <select data-id="${l.id}" class="statusSel">
+          ${['New','Contacted','Call booked','Won','Lost'].map(s=>`<option ${s===l.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`).join('');
+
+  tb.querySelectorAll('.statusSel').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      await fetch(`/api/leads/${sel.dataset.id}/status`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({status: sel.value})
+      });
+      load();
+    });
+  });
+}
+
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  load();
+  $('#refresh').addEventListener('click', load);
+  $('#filter').addEventListener('input', load);
+  $('#tierFilter').addEventListener('change', load);
+});
+</script>
+</body>
+</html>
